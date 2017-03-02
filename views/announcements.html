@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>announcements</title>
+    <style>
+        .done{text-decoration: line-through; color:#ccc;}
+    </style>
+</head>
+<body style="background-color:lightslategray;">
+
+<div ng-app="thePage" ng-controller="scrumController">
+
+    <h1>
+        Scrum Board
+    </h1>
+
+    <div>
+        <fieldset style="background-color:whitesmoke">
+            <h4>Backlog</h4>
+            <u1>
+                <li ng-repeat="x in backlog">
+                    <input type="checkbox" id="x.msg_id" ng-change="deleteBacklog(x.msg_id)" ng-model="x.done"/>
+                    <span ng-class="{'done':x.done}">{{x.message}}</span>
+                </li>
+            </u1>
+            <br/>
+            <form name="backlogForm" ng-submit="addBacklog()">
+                <input type="text" ng-model="newBacklog" required />
+                <button ng-disabled="backlogForm.$invalid">Add</button>
+            </form>
+            <br/>
+            <button ng-click="toActiveSprint_fromBacklog()">Move to Active Sprint</button>
+        </fieldset>
+    </div>
+
+    <div>
+        <fieldset style="background-color:whitesmoke">
+            <h4>Active Sprint</h4>
+            <u1>
+                <li ng-repeat="y in sprint">
+                    <input type="checkbox" id="y.msg_id" ng-model="y.done"/>
+                    <span ng-class="{'done':y.done}">{{y.message}}</span>
+                </li>
+            </u1>
+            <br/>
+            <form name="activeSprintForm" ng-submit="addSprint()">
+                <input type="text" ng-model="newSprint" required />
+                <button ng-disabled="activeSprintForm.$invalid">Add</button>
+            </form>
+            <br/>
+            <button ng-click="toBacklog_fromSprint()">Move to Backlog</button>
+            <br/>
+            <button ng-click="toComplete_fromSprint()">Move to Complete</button>
+        </fieldset>
+    </div>
+
+    <div>
+        <fieldset style="background-color:whitesmoke">
+            <h4>Complete</h4>
+            <u1>
+                <li ng-repeat="z in complete">
+                    <input type="checkbox" id="z.msg_id" ng-model="z.done"/>
+                    <span ng-class="{'done':z.done}">{{z.message}}</span>
+                </li>
+            </u1>
+            <br/>
+            <form name="completeForm" ng-submit="addComplete()">
+                <input type="text" ng-model="newComplete" required />
+                <button ng-disabled="completeForm.$invalid">Add</button>
+            </form>
+            <br/>
+            <button ng-click="toActiveSprint_fromComplete()">Move to Active Sprint</button>
+        </fieldset>
+    </div>
+
+    <div>
+        <fieldset style="background-color:whitesmoke">
+            <h4>Group Meeting Log</h4>
+            <u1>
+                <li ng-repeat="a in meetingLog">
+                    <input type="checkbox" id="a.msg_id" ng-model="a.done"/>
+                    <span ng-class="{'done':a.done}">{{a.message}}</span>
+                </li>
+            </u1>
+            <br/>
+            <form name="meetingForm" ng-submit="addMeeting()">
+                <input type="text" ng-model="newMeeting" required />
+                <button ng-disabled="meetingForm.$invalid">Add</button>
+            </form>
+            <br/>
+            <button ng-click="clearMeetings()">Remove Selected Meetings</button>
+        </fieldset>
+    </div>
+
+</div>
+<script language="javascript">
+    var page = angular.module('thePage', []);
+
+    page.controller('scrumController', function($scope, $http, $window) {
+        $scope.backlog = [];
+        $scope.sprint = [];
+        $scope.complete = [];
+        $scope.meetingLog = [];
+
+        //retrieve the list upon loading the page
+        var getData = $http({
+            method: 'GET',
+            url: '/scrum_req',
+            params: {team_id: $window.sessionStorage.teamID}
+        }).then(
+                function (response) {
+                    $scope.backlog = response.data.backlog;
+                    $scope.sprint = response.data.sprint;
+                    $scope.complete = response.data.complete;
+                    $scope.meetingLog = response.data.meetings;
+                }, function (response) {
+                    //
+                });
+
+        $scope.addBacklog = function () {
+            $scope.backlog.push({'message': $scope.newBacklog, 'done': false});
+            var addBacklogItem = $http({
+                method: 'POST',
+                url: '/addBacklog',
+                params: {backlog: $scope.newBacklog, team_id: $window.sessionStorage.teamID}
+            }).then(
+                    function (response) {
+                        //nothing
+                    }, function (response) {
+                        $window.alert('from controller -- error occurred');
+                    }
+            );
+            $scope.newBacklog = '';
+        };
+
+        $scope.toActiveSprint_fromBacklog = function() {
+            var toMove = $scope.backlog.filter(function (item) {
+                return item.done;
+            });
+
+            for(var x = 0; x < toMove.length; x++) {
+                var updateDB1 = $http({
+                    method: 'POST',
+                    url: '/backlogToSprint',
+                    params: {msg_id: toMove[x].msg_id, team_id: $window.sessionStorage.teamID}
+                }).then(
+                        function (response) {
+                            //nothing
+                        }, function (response) {
+                            $window.alert('from controller -- error occurred');
+                        }
+                );
+            }
+
+            $scope.backlog = $scope.backlog.filter(function (item) {
+                return !item.done;
+            });
+
+            for(var i = 0; i < toMove.length; i++) {
+                toMove[i].done = false;
+                $scope.sprint.push(toMove[i]);
+            }
+        };
+
+        $scope.addSprint = function () {
+            $scope.sprint.push({'message': $scope.newSprint, 'done': false});
+            var addBacklogItem = $http({
+                method: 'POST',
+                url: '/addSprint',
+                params: {sprint: $scope.newSprint, team_id: $window.sessionStorage.teamID}
+            }).then(
+                    function (response) {
+                        //nothing
+                    }, function (response) {
+                        $window.alert('from controller -- error occurred');
+                    }
+            );
+            $scope.newSprint = '';
+        };
+
+        $scope.toBacklog_fromSprint = function() {
+            var toMove = $scope.sprint.filter(function (item) {
+                return item.done;
+            });
+
+            for(var x = 0; x < toMove.length; x++) {
+                var updateDB2 = $http({
+                    method: 'POST',
+                    url: '/sprintToBacklog',
+                    params: {msg_id: toMove[x].msg_id, team_id: $window.sessionStorage.teamID}
+                }).then(
+                        function (response) {
+                            //nothing
+                        }, function (response) {
+                            $window.alert('from controller -- error occurred');
+                        }
+                );
+            }
+
+            $scope.sprint = $scope.sprint.filter(function (item) {
+                return !item.done;
+            });
+
+            for(var i = 0; i < toMove.length; i++) {
+                toMove[i].done = false;
+                $scope.backlog.push(toMove[i]);
+            }
+        };
+
+        $scope.toComplete_fromSprint = function() {
+            var toMove = $scope.sprint.filter(function (item) {
+                return item.done;
+            });
+
+            for(var x = 0; x < toMove.length; x++) {
+                var updateDB3 = $http({
+                    method: 'POST',
+                    url: '/sprintToComplete',
+                    params: {msg_id: toMove[x].msg_id, team_id: $window.sessionStorage.teamID}
+                }).then(
+                        function (response) {
+                            //nothing
+                        }, function (response) {
+                            $window.alert('from controller -- error occurred');
+                        }
+                );
+            }
+
+            $scope.sprint = $scope.sprint.filter(function (item) {
+                return !item.done;
+            });
+
+            for(var i = 0; i < toMove.length; i++) {
+                toMove[i].done = false;
+                $scope.complete.push(toMove[i]);
+            }
+        };
+
+        $scope.addComplete = function () {
+            $scope.complete.push({'message': $scope.newComplete, 'done': false});
+            var addBacklogItem = $http({
+                method: 'POST',
+                url: '/addComplete',
+                params: {complete: $scope.newComplete, team_id: $window.sessionStorage.teamID}
+            }).then(
+                    function (response) {
+                        //nothing
+                    }, function (response) {
+                        $window.alert('from controller -- error occurred');
+                    }
+            );
+            $scope.newComplete = '';
+        };
+
+
+        $scope.toActiveSprint_fromComplete = function() {
+            var toMove = $scope.complete.filter(function (item) {
+                return item.done;
+            });
+
+            for(var x = 0; x < toMove.length; x++) {
+                var updateDB3 = $http({
+                    method: 'POST',
+                    url: '/completeToSprint',
+                    params: {msg_id: toMove[x].msg_id, team_id: $window.sessionStorage.teamID}
+                }).then(
+                        function (response) {
+                            //nothing
+                        }, function (response) {
+                            $window.alert('from controller -- error occurred');
+                        }
+                );
+            }
+
+            $scope.complete = $scope.complete.filter(function (item) {
+                return !item.done;
+            });
+
+            for(var i = 0; i < toMove.length; i++) {
+                toMove[i].done = false;
+                $scope.sprint.push(toMove[i]);
+            }
+        };
+
+        $scope.addMeeting = function () {
+            $scope.meetingLog.push({'message': $scope.newMeeting, 'done': false});
+            var addBacklogItem = $http({
+                method: 'POST',
+                url: '/addMeeting',
+                params: {meeting: $scope.newMeeting, team_id: $window.sessionStorage.teamID}
+            }).then(
+                    function (response) {
+                        //nothing
+                    }, function (response) {
+                        $window.alert('from controller -- error occurred');
+                    }
+            );
+            $scope.newMeeting = '';
+        };
+
+        $scope.clearMeetings = function() {
+            var toDelete = $scope.meetingLog.filter(function (item) {
+                return item.done;
+            });
+
+            for(var i = 0; i < toDelete.length; i++) {
+                var updateDB4 = $http({
+                    method: 'POST',
+                    url: '/deleteMeeting',
+                    params: {msg_id: toDelete[i].msg_id, team_id: $window.sessionStorage.teamID}
+                }).then(
+                        function (response) {
+                            //nothing
+                        }, function (response) {
+                            $window.alert('from controller -- error occurred');
+                        }
+                );
+            }
+
+            $scope.meetingLog = $scope.meetingLog.filter(function (item) {
+                return !item.done;
+            });
+        }
+    });
+</script>
+</body>
+</html>

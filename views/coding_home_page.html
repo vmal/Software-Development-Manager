@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Coding Home Page</title>
+
+</head>
+
+<body>
+<h1>
+    Coding Home Page
+</h1>
+
+<hr>
+
+<div id="div1">
+    <h3>Trello Board</h3>
+
+    <h4>Active Sprint</h4>
+    <p>this, that, you get the point... </p>
+
+    <h4>Completed</h4>
+    <p>everything</p>
+
+    <h4>Meetings</h4>
+    <p>6 am : 20 min</p>
+
+    <h4>Backlog</h4>
+</div>
+<div id="div2">
+    <h4>git stats</h4>
+</div>
+<div id="div3">
+    <h4>misc. announcements</h4>
+</div>
+<div id="div4">
+    <h4>leaderboard</h4>
+</div>
+
+
+<script language="javascript">
+    var app = angular.module('loginPage', []);
+    app.controller('loginController', function($scope, $http, $window) {
+        // userID accessible at --> $window.sessionStorage.userID
+        // teamID accessible at --> $window.sessionStorage.teamID
+
+        $scope.submit = function() {
+
+            var login_http = $http({
+                method: 'POST',
+                url: '/login',
+                params: { username: $scope.uname, password: $scope.pword }
+            }).then(
+                    function (response) {
+
+                    }, function (response) {
+
+                    }
+            )
+        }
+    });
+</script>
+
+<style>
+    html, body { height: 100%; padding: 0; margin: 0; }
+    div { width: 50%; height: 50%; float: left; }
+    #div1 { background: #DDD; }
+    #div2 { background: #AAA; }
+    #div3 { background: #777; }
+    #div4 { background: #444; }
+</style>
+
+</body>
+</html>

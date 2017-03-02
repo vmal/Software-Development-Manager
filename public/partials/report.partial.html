@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en-us" data-ng-app="gitApp" data-ng-controller="reportController">
+<html lang="en-us" data-ng-app="gitApp" data-ng-controller="gitController">
+<head>
+    <meta charset="utf-8">
+
+    <title data-ng-bind="pageTitle + ' | Git-Technetium'">Git-Technetium</title>
+
+    <!-- Bootstrap Core CSS -->
+
+    <link href= "../vendor/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="../stylesheets/admin.css" rel="stylesheet">
+
+    <!-- jQuery -->
+    <script src="../vendor/jquery/dist/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <!-- LIBRARIES -->
+    <script src="../vendor/angular/angular.js"></script>
+    <script src="../vendor/angular-ui-router/release/angular-ui-router.min.js"></script>
+    <script src="../vendor/async/lib/async.js"></script>
+
+    <script src="../scripts/gitapp.js"></script>
+
+
+    <!-- CONTROLLERS -->
+    <script src="../scripts/controllers/gitController.js"></script>
+    <script src="../scripts/controllers/issuesController.js"></script>
+
+    <!-- FACTORIES -->
+    <script src="../scripts/factories/issuesFactory.js"></script>
+
+<body>
+<div id="wrapper">
+    <!-- Include navbar and sidebar addons -->
+    <div ng-include="'addons/navbar.html'"></div>
+    <div ng-include="'addons/sidebar.html'"></div>
+    <div id="page-wrapper">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title"><i class="fa fa-bar-chart-o fa-fw"></i> Repository Statistics </h3>
+                        </div>
+                        <div class="panel-body">
+                            <form ng-submit="submitQuery()">
+                                <p>
+                                    <strong>Repository Owner's Name: </strong><input type="text" ng-model="owner" required><br>
+                                    <strong>Repository Name: </strong><input type="text" ng-model="repo" required><br>
+                                    <button type="submit">Get Statistics</button>
+                                </p>
+                            </form>
+
+                            <div class="col-lg-12">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover table-striped tablesorter">
+                                        <thead>
+                                        <tr>
+                                            <th class="header"> Contributor </th>
+                                            <th class="header"> Commits </th>
+                                            <th class="header"> Commit Comments </th>
+                                            <th class="header"> LoC Added </th>
+                                            <th class="header"> LoC Deleted </th>
+                                            <th class="header"> Issues Opened </th>
+                                            <th class="header"> Issues Assigned </th>
+                                            <th class="header"> Issues Closed </th>
+                                            <th class="header"> Issue Comments </th>
+                                            <th class="header"> Pull Requests </th>
+                                            <th class="header"> Pull Request Comments </th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr data-ng-repeat="contributor in parsed">
+                                            <td> {{ contributor.name }} </td>
+                                            <td> {{ contributor.commits }} </td>
+                                            <td> {{ contributor.commit_comments }} </td>
+                                            <td> {{ contributor.loc_added }} </td>
+                                            <td> {{ contributor.loc_deleted }} </td>
+                                            <td> {{ contributor.issues_opened }} </td>
+                                            <td> {{ contributor.issues_assigned }} </td>
+                                            <td> {{ contributor.issues_closed }} </td>
+                                            <td> {{ contributor.issue_comments }} </td>
+                                            <td> {{ contributor.pull_requests }} </td>
+                                            <td> {{ contributor.pull_request_comments }} </td>
+
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+
+
+                        </div> <!-- /panel-body -->
+                    </div> <!-- /panel panel-default-->
+                </div> <!-- /col-lg-12 -->
+            </div> <!-- /.row -->
+        </div> <!-- /container-fluid -->
+    </div> <!-- /page-wrapper-->
+    <div> <!-- /wrapper -->
+
+
+<body>
+<div data-ui-view></div>
+<!-- Navbar will always be present -->
+<div ng-include="'../addons/navbar.html'"></div>
+</body>
+</html>
+</body>

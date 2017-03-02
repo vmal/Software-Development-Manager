@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>todo</title>
+    <style>
+        .done{text-decoration: line-through; color:#ccc;}
+    </style>
+</head>
+<body style="background-color:lightslategray;">
+<h1>
+    TO-DO LIST
+</h1>
+
+<div ng-app="ToDo" ng-controller="todoController">
+    <fieldset style="background-color:whitesmoke">
+        <form name="frm" ng-submit="addTodo()">
+            <input type="text" name="newtodo" ng-model="newTodo" required />
+            <button ng-disabled="frm.$invalid">Go</button>
+        </form>
+        <br/>
+        <u1>
+            <li ng-repeat="todo in todos">
+                <input type="checkbox" id="todo.msg_id" ng-change="deleteMessage(todo.msg_id)" ng-model="todo.done"/>
+                <span ng-class="{'done':todo.done}">{{todo.message}}</span>
+            </li>
+        </u1>
+        <br/>
+        <button ng-click="clearCompleted()">Clear Completed</button>
+    </fieldset>
+</div>
+
+<script language="javascript">
+    var page = angular.module('ToDo', []);
+    page.controller('todoController', function($scope, $http, $window) {
+        $scope.todos = [];
+        //console.log($window.sessionStorage.teamID);
+
+        //retrieve the list upon loading the page
+        var todo_http = $http({
+            method: 'GET',
+            url: '/todo_req',
+            params: {team_id: $window.sessionStorage.teamID}
+        }).then(
+                function (response) {
+                    $scope.todos = response.data;
+                }, function (response) {
+                    $window.alert('nothing in your todo list yet! :P');
+                });
+
+        $scope.addTodo = function () {
+            $scope.todos.push({'message': $scope.newTodo, 'done': false});
+            var toDo_http = $http({
+                method: 'POST',
+                url: '/ToDoList',
+                params: {toDoList: $scope.newTodo, team_id: $window.sessionStorage.teamID}
+            }).then(
+                    function (response) {
+                        //nothing
+                    }, function (response) {
+                        $window.alert('from controller -- error occurred');
+                    }
+            );
+            $scope.newTodo = ''
+        };
+
+        $scope.deleteMessage = function (messageID) {
+            console.log(messageID);
+            var rid = $http({
+                method: 'POST',
+                url: '/deleteMessage',
+                params: { message_ID : messageID}
+            }).then(
+                    function successful(response) {
+                        //successful response
+                    }, function unsuccessful(response) {
+                        //unsuccessful response
+                    });
+        };
+
+        $scope.clearCompleted = function () {
+            $scope.todos = $scope.todos.filter(function (item) {
+                return !item.done;
+            })
+        };
+    });
+</script>
+</body>
+</html>

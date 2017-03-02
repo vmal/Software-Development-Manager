@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Team Page</title>
+</head>
+
+<style>
+    a:link    {text-decoration:none}
+    a:visited {text-decoration:none}
+    a:hover   {text-decoration:underline}
+    a:active  {text-decoration:underline}
+</style>
+
+<style type="text/css">
+    .topcorner{
+        position:absolute;
+        top:0;
+        right:0;
+    }
+</style>
+
+<body style="background-color:lightslategray;">
+<h1>
+    Team Page
+</h1>
+
+<div ng-app="teamPage" ng-controller="teamController">
+    <!---<input type="button" id="userProf" name="userProf" value="Enter My Profile" ng-click="enterProfilePage(0)"/>-->
+
+    <div class="topcorner"><input type="button" id="userProf" name="userProf" value="Enter My Profile" ng-click="enterProfilePage(0)"/></div>
+
+    <form id="Communication Board">
+        <fieldset>
+
+            <legend><i><h3>Communication Board</h3></i></legend>
+            <legend><a id="chatBoard" name="chatBoard" ng-click="chatBoard()">Chat Application</a></legend>
+            <!--<h7>
+                <input type="button" id="chatBoard" name="chatBoard" value="Launch chat application" ng-click="chatBoard()" />
+            </h7>-->
+
+            <br/>
+            <legend><a id="videoCall" name="videoCall" value="Launch video call application" ng-click="enterVideoChat()">Video Call</a></legend>
+            <!--<h7>
+                <input type="button" id="videoCall" name="videoCall" value="Launch video call application" ng-click="enterVideoChat()" />
+            </h7>-->
+
+            <br/>
+            <legend><a id="screenshare" name="sharing" ng-click="enterScreenSharing()">Screenshare</a></legend>
+            <!--<h7>
+                screenshare feature coming up!
+            </h7>-->
+        </fieldset>
+    </form><br/>
+
+    <form id="Data Board" action="">
+        <fieldset>
+
+            <legend><i><h3>Data Board</h3></i></legend>
+            <legend><a name="enterCalendar" ng-click="enterCalendar()">Calendar Application</a></legend>
+            <!--<h7>
+                <input name="enterCalendar" ng-click="enterCalendar()" type="button" value="Enter Calendar"/>
+            </h7>-->
+
+            <br/>
+            <legend><a name="enterToDo" ng-click="entertodo()">Team To Do List</a></legend>
+            <!--<h7>
+                <input name="enterToDo" ng-click="entertodo()" type="button" value="Enter To Do List"/>
+            </h7>-->
+
+            <br/>
+            <legend><a name="enterAnnouncements" ng-click="enterAnnouncements()">Scrum Board</a></legend>
+            <!--<h7>
+                <input name="enterAnnouncements" ng-click="enterAnnouncements()" type="button" value="Enter Scrum Board"/>
+            </h7>-->
+
+        </fieldset>
+    </form><br/>
+
+    <form id="Team Board" action="">
+        <fieldset>
+
+            <legend><i><h3>Team Information</h3></i></legend>
+            <legend>Team Members</legend>
+            <li ng-repeat="x in records">
+                <a id="{{x.user_id}}" ng-click="enterProfilePage(x.user_id)"><b>{{x.login_name}}</b> - {{x.firstName}} {{x.lastName}} </a>
+            </li>
+
+            <br/>
+            <legend>Add Team Member</legend>
+            <select ng-model="selectedItem">
+                <option ng-repeat="x in users" value="{{x.login_name}}">{{x.login_name}}</option>
+            </select>
+            <input name="buttonExecute" ng-click="addUser()" type="button" value="Add User" />
+        </fieldset>
+    </form>
+    <br/><br/>
+    <h1>
+        Code Status
+    </h1>
+    <input type="button" id="Issues" name="Issues" value="Issues" ng-click="Issues()" /><br/><br/>
+    <input type="button" id="Assigned" name="Assigned" value="Assigned" ng-click="Assigned()" /><br/><br/>
+    <input type="button" id="Issues Opened" name="Issues Opened" value="Issues Opened" ng-click="issues_opened()" /><br/><br/>
+    <input type="button" id="Issues Closed" name="Issues Closed" value="Issues Closed" ng-click="issues_closed()" /><br/><br/>
+    <input type="button" id="Commit Comments" name="Commit Comments" value="Commit Comments" ng-click="commit_comments()" /><br/><br/>
+    <input type="button" id="loc" name="loc" value="Lines of Code" ng-click="loc()" />
+</div>
+
+<script>
+    var page = angular.module('teamPage', []);
+    page.controller('teamController', function($scope, $http, $window) {
+        // userID accessible at --> $window.sessionStorage.userID
+        // teamID accessible at --> $window.sessionStorage.teamID
+
+        //retrieve the list of team members on page load
+        var getMembers = $http({
+            method: 'GET',
+            url: '/members_req',
+            params: { team_id: $window.sessionStorage.teamID }
+        }).then(
+                function (response) {
+                    $scope.records = response.data;
+                }, function (response) {
+                    $window.alert('error occured ** from controller');
+                }
+        );
+
+        //fill selected list options
+        var getAllMembers = $http({
+            method: 'GET',
+            url: '/allMembers'
+        }).then(
+                function (response) {
+                    $scope.users = response.data;
+                }, function (response) {
+                    $window.alert('error occured ** from controller');
+                }
+        );
+
+        $scope.addUser = function() {
+            var createUser = $http({
+                method: 'POST',
+                url: '/createUser',
+                params: { username: $scope.selectedItem, team_id: $window.sessionStorage.teamID }
+            }).then(
+                    function successful(response) {
+                        alert('successfuly created user');
+                    }, function unsuccessful(response) {
+                        alert('error creating user');
+                    });
+        };
+
+        $scope.enterProfilePage = function(user_id) {
+            if(user_id == 0)
+                $window.sessionStorage.profileID = $window.sessionStorage.userID;
+            else
+                $window.sessionStorage.profileID = user_id;
+
+            $window.location.href = '/profilePage?userid=' + $window.sessionStorage.profileID;
+        };
+
+        $scope.enterCalendar = function() {
+            $window.location.href = '/calendarPage';
+        };
+
+        $scope.chatBoard = function() {
+            $window.location.href = '/chatBoard';
+        };
+
+        $scope.entertodo = function() {
+            $window.location.href = '/ToDoPage';
+        };
+
+        $scope.enterAnnouncements = function() {
+            $window.location.href = '/announcements';
+        };
+
+        $scope.enterVideoChat = function() {
+            $window.location.href = '/videoChat';
+        };
+
+        $scope.enterScreenSharing = function() {
+            $window.location.href = '/ScreenSharing';
+        };
+
+        $scope.Issues = function() {
+            $window.location.href = '/issues_req';
+        };
+
+        $scope.Assigned = function() {
+            $window.location.href = '/issues_assign';
+        };
+
+        $scope.issues_opened = function() {
+            $window.location.href = '/issues_open';
+        };
+
+        $scope.issues_closed = function() {
+            $window.location.href = '/issues_close';
+        };
+
+        $scope.commit_comments = function() {
+            $window.location.href = '/commit_Comments';
+        };
+
+        $scope.loc = function() {
+            $window.location.href = '/locc';
+        };
+    });
+</script>
+</body>
+</html>

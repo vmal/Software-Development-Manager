@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Team Profile</title>
+</head>
+<body style="background-color:lightslategray;">
+<h1>
+    Team Profile
+</h1>
+
+<div ng-app="teamProfilePage" ng-controller="teamProfileController">
+    <form id="Personal_Info">
+        <fieldset>
+            <legend><i><h3>Team Members</h3></i></legend>
+            <h7>
+                <ul ng-repeat="x in teamList">
+                    <li>
+                        <a>
+                            {{ x.login_name }}
+                        </a>
+                    </li>
+                </ul>
+            </h7>
+        </fieldset>
+    </form><br/>
+
+    <form id="ToDo List">
+        <fieldset>
+            <legend><i><h3>To-Do List</h3></i></legend>
+            <h7>
+                <ul ng-repeat="x in todo">
+                    <li>
+                        {{ x.message }}
+                    </li>
+                </ul>
+            </h7>
+        </fieldset>
+    </form><br/>
+
+
+    <button ng-click="openScrumBoard()">Go To Scrum Board</button>
+    <button ng-click="openCalendar()">Go To Calendar</button>
+
+</div>
+
+
+
+<script>
+    var page = angular.module('teamProfilePage', []);
+    page.controller('teamProfileController', function($scope, $http, $window) {
+        // teamID accessible at --> $window.sessionStorage.teamID
+
+        var getTeams = $http({
+            method: 'POST',
+            url: '/getTeamMembers',
+            params: { team_id: $window.sessionStorage.teamID }
+        }).then(
+                function (response) {
+                    $scope.teamList = response.data;
+                }, function (response) {
+                }
+        );
+
+        var getTodo = $http({
+            method: 'POST',
+            url: '/getToDoList',
+            params: { team_id: $window.sessionStorage.teamID }
+        }).then(
+                function (response) {
+                    $scope.todo = response.data;
+                }, function (response) {
+                }
+        );
+
+        $scope.openScrumBoard = function() {
+            $window.location.href = '/announcements';
+        }
+
+        $scope.openCalendar = function() {
+            $window.location.href = '/calendarPage';
+        }
+
+
+    });
+</script>
+</body>
+</html>

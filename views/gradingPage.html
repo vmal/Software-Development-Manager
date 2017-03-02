@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+
+<head>
+    <title>Grading Page</title>
+</head>
+
+
+
+<body style="background-color:lightslategray;">
+
+<h1>
+    Welcome to the Grading Page!
+</h1>
+
+
+<div ng-app="gradingPage" ng-controller="gradingController">
+    <li ng-repeat="x in records">
+        <fieldset style="background-color:whitesmoke">
+            Title: {{x.title}} /  <input type="text" placeholder="Points Received" ng-model="points" name="points"> / Total Points: {{x.point_t}} / Due: {{x.due}} <input name="update" id="update" ng-click="updateGrade(points, x.assignment_id)" type="button" value="Update Grade"/>
+        </fieldset>
+    </li><br/>
+</div>
+
+<script>
+    var page = angular.module('gradingPage', []);
+    page.controller('gradingController', function($scope, $http, $window) {
+        // userID accessible at --> $window.sessionStorage.userID
+
+        var login_http = $http({
+            method: 'GET',
+            url: '/grading_req',
+            params: { team_id: $window.sessionStorage.teamID }
+        }).then(
+                function (response) {
+                    $scope.records = response.data;
+                }, function (response) {
+                    $window.alert('from controller -- error occurred');
+                }
+        );
+
+        $scope.updateGrade = function(points, id) {
+            var login_http = $http({
+            method: 'POST',
+            url: '/updateGrade',
+            params: { team_id: $window.sessionStorage.teamID, total: points, assignment: id}
+        }).then(
+                function (response) {
+
+                }, function (response) {
+                    $window.alert('from controller -- error occurred');
+                }
+            );
+        };
+    })
+</script>
+</body>
+</html>

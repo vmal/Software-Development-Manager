@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+</head>
+
+
+<body style="background-color:lightslategray;">
+<h1>
+    User Profile
+</h1>
+
+<div ng-app="profilePage" ng-controller="profileController">
+    <form id="Personal_Info">
+        <fieldset>
+            <legend><i><h3>Personal Information</h3></i></legend>
+            <h7>
+                <b>Full Name: </b> {{user.firstName}} {{user.lastName}}
+                <br/><br/>
+                <b>Login Name: </b> {{user.login_name}}
+                <br/><br/>
+                <b>Email Address: </b> {{user.email}}
+            </h7>
+        </fieldset>
+    </form><br/>
+
+    <form id="Team_List">
+        <fieldset>
+            <legend><i><h3>Team's Joined</h3></i></legend>
+            <h7>
+                <li ng-repeat="x in teamList">
+                    {{x.team_name}}<br/>
+                </li>
+            </h7>
+        </fieldset>
+    </form><br/>
+
+    <form id="Grades">
+        <fieldset>
+            <legend><i><h3>Grades</h3></i></legend>
+            <h7>
+                <li ng-repeat="x in grades">
+                    Title: {{x.title}} /  Received Points: {{x.point_r}} / Total Points: {{x.point_t}} / Due: {{x.due}}
+                    <br/>
+                </li>
+            </h7>
+        </fieldset>
+    </form><br/>
+</div>
+
+<script>
+    var page = angular.module('profilePage', []);
+    page.controller('profileController', function($scope, $http, $window) {
+        // userID accessible at --> $window.sessionStorage.userID
+        // teamID accessible at --> $window.sessionStorage.teamID
+
+        //retrieve the list of teams on page load
+        var getTeams = $http({
+            method: 'POST',
+            url: '/getTeams',
+            params: { user_id: $window.sessionStorage.profileID }
+        }).then(
+                function (response) {
+                    $scope.teamList = response.data;
+                }, function (response) {
+                    $window.alert('error occured ** from controller');
+                }
+        );
+
+        //retrieve the user object on page load
+        var getObject = $http({
+            method: 'POST',
+            url: '/profile_req',
+            params: { user_id: $window.sessionStorage.profileID }
+        }).then(
+                function (response) {
+                    $scope.user = response.data[0];
+                }, function (response) {
+                    $window.alert('error occured ** from controller');
+                }
+        )
+
+        var login_http = $http({
+            method: 'GET',
+            url: '/grading_req',
+            params: { team_id: $window.sessionStorage.teamID }
+        }).then(
+                function (response) {
+                    $scope.grades = response.data;
+                }, function (response) {
+                    $window.alert('from controller -- error occurred');
+                }
+        );;
+    });
+</script>
+</body>
+</html>

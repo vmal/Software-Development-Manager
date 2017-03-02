@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+
+<style>
+    a:link    {text-decoration:none}
+    a:visited {text-decoration:none}
+    a:hover   {text-decoration:underline}
+    a:active  {text-decoration:underline}
+</style>
+
+<style type="text/css">
+    .topcorner{
+        position:absolute;
+        top:0;
+        right:0;
+    }
+</style>
+
+<head>
+    <title>Team List</title>
+</head>
+
+
+
+<body style="background-color:lightslategray;">
+
+<h1>
+    Welcome to Your Team List Page!
+</h1>
+
+
+<div ng-app="teamListPage" ng-controller="listController">
+
+    <div class="topcorner"><input type="button" id="userProf" name="userProf" value="Enter My Profile" ng-click="enterProfilePage(0)"/></div>
+
+    <li ng-repeat="x in records">
+        <fieldset style="background-color:whitesmoke">
+            <a id="{{x.team_id}}" name="enter" ng-click="enterTeamPage(x.team_id)">{{x.team_name}}</a><br/>
+        </fieldset>
+    </li><br/>
+    <input type="button" id="Create" name="Create" value="Create New Team" ng-click="enterCreateTeamPage()" />
+
+</div>
+
+<script>
+    var page = angular.module('teamListPage', []);
+    page.controller('listController', function($scope, $http, $window) {
+        // userID accessible at --> $window.sessionStorage.userID
+
+        var login_http = $http({
+            method: 'GET',
+            url: '/team_req',
+            params: { user_id: $window.sessionStorage.userID }
+        }).then(
+                function (response) {
+                    $scope.records = response.data;
+                }, function (response) {
+                    $window.alert('error occured ** from controller');
+                }
+        );
+
+        $scope.enterTeamPage = function(teamID) {
+            $window.sessionStorage.teamID = teamID;
+            $window.location.href = '/teamPage';
+        };
+
+        $scope.enterProfilePage = function(user_id) {
+            if(user_id == 0)
+                $window.sessionStorage.profileID = $window.sessionStorage.userID;
+            else
+                $window.sessionStorage.profileID = user_id;
+
+            $window.location.href = '/profilePage?userid=' + $window.sessionStorage.profileID;
+        };
+
+        $scope.enterCreateTeamPage = function() {
+            $window.location.href = '/createTeamPage';
+        };
+
+    })
+</script>
+
+
+
+</body>
+</html>
